@@ -2,6 +2,7 @@
 import collections
 import copy
 import mock
+import ddt
 from datetime import datetime, timedelta
 from pytz import UTC
 
@@ -109,6 +110,7 @@ class ExtraPanelTabTestCase(TestCase):
         return course
 
 
+@ddt.ddt
 class CourseImageTestCase(ModuleStoreTestCase):
     """Tests for course image URLs."""
 
@@ -143,6 +145,16 @@ class CourseImageTestCase(ModuleStoreTestCase):
         course = CourseFactory.create(course_image=u'before after.jpg')
         self.verify_url(
             unicode(course.id.make_asset_key('asset', course_image.replace(" ", "_"))),
+            utils.course_image_url(course)
+        )
+
+    @ddt.data(ModuleStoreEnum.Type.split, ModuleStoreEnum.Type.mongo)
+    def test_empty_image_name(self, default_store):
+        """ Verify that empty image names are cleaned """
+        course_image = u''
+        course = CourseFactory.create(course_image=course_image, default_store=default_store)
+        self.assertEquals(
+            course_image,
             utils.course_image_url(course)
         )
 
