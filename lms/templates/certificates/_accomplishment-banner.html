@@ -1,5 +1,14 @@
-<%! from django.utils.translation import ugettext as _ %>
+<%!
+import urllib
+from django.utils.translation import ugettext as _
+from django.core.urlresolvers import reverse
+%>
 <%namespace name='static' file='../static_content.html'/>
+<%
+  accomplishment_course_title =  accomplishment_copy_course_name
+  if certificate_data and certificate_data.get('course_title', ''):
+    accomplishment_course_title =  certificate_data.get('course_title', '')
+%>
 <%block name="js_extra">
   <%static:js group='certificates_wv'/>
   <script type="text/javascript">
@@ -10,6 +19,23 @@
         },
         dataType: 'json'
       });
+
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : "${settings.FACEBOOK_APP_ID}",
+          xfbml      : true,
+          version    : 'v2.3'
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+
       $(".action-linkedin-profile").click(function() {
         var data = {
           user_id: '${accomplishment_user_id}',
@@ -22,6 +48,19 @@
         Logger.log('edx.certificate.shared', data);
       });
     });
+
+    function shareOnFB(text) {
+        FB.ui({
+            method: 'feed',
+            name: text,
+            link: "${request.build_absolute_uri(reverse('cert_html_view', kwargs=dict(user_id=str(user.id),course_id=unicode(course_id))))}",
+            picture: "${request.build_absolute_uri(course_image_url)}",
+            caption: 'Caption like which appear as title of the dialog box', // TODO# need to update as per requirement
+            description: 'Small description of the post' // TODO# need to update as per requirement
+        }, function(response) {
+            console.log(response);
+        });
+    }
   </script>
 </%block>
 
@@ -30,7 +69,7 @@
         <div class="message message-block message-notice">
             <h2 class="message-title hd-5 emphasized">${accomplishment_banner_opening}</h2>
             <div class="wrapper-copy-and-actions">
-                <p class="message-copy copy copy-base emphasized">${accomplishment_banner_congrats}</p>
+                <p class="message-copy copy  copy-base emphasized">${accomplishment_banner_congrats}</p>
                 <div class="message-actions">
                     <h3 class="sr-only">${_("Take this with you:")}</h3>
 
@@ -55,6 +94,15 @@
                             alt="${_('Add to LinkedIn Profile')}" />
                     </a>
                 %endif
+                    <%
+                     if share_settings:
+                       fb_share_text = _("I completed the {course_title} course on edX and here is the link to my certificate.").format(course_title=accomplishment_course_title)
+                       if share_settings.get('CERTIFICATE_FACEBOOK_TEXT', None):
+                            fb_share_text = share_settings.get('CERTIFICATE_FACEBOOK_TEXT')
+                     %>
+                    % if share_settings.get('CERTIFICATE_FACEBOOK', False):
+                        <a href="javascript:void(0)" onclick="shareOnFB('${fb_share_text}'); return false;">Share</a>
+                    %endif
                 </div>
             </div>
         </div>
