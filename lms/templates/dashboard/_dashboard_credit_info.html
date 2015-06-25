@@ -1,0 +1,70 @@
+<%page args="credit_status" />
+<%!
+    import datetime
+    import pytz
+    from django.utils.translation import ugettext as _
+    from util.date_utils import get_default_time_display
+%>
+<%namespace name='static' file='../static_content.html'/>
+
+% if credit_status["eligible"]:
+    <div class="message message-status is-shown credit-message">
+    % if credit_status["error"]:
+        <p class="message-copy credit-error-msg">
+            ${_(
+                "An unexpected error occurred while retrieving your credit status.  "
+                "Please contact {support_email}."
+            ).format(
+                support_email='<a href="mailto:{address}">{address}</a>'.format(
+                    address=settings.DEFAULT_FEEDBACK_EMAIL
+                )
+            )}
+        </p>
+    % elif not credit_status["purchased"]:
+        <p class="credit-eligibility-msg">
+            % if credit_status["deadline"] < datetime.datetime.now(pytz.UTC) + datetime.timedelta(days=30):
+                ${_("{username}, your eligibility for credit expires on {deadline}. Don't miss out!").format(
+                    username=user.username,
+                    deadline=get_default_time_display(credit_status["deadline"])
+                )}
+            % else:
+                ${_("Congratulations {username}, you have met the requirements for credit!").format(username=user.username)}
+            % endif
+        </p>
+        <div class="purchase_credit">
+            ## TODO: set the URL for the link to the provider selection page on the E-Commerce service
+            <a class="btn purchase-credit-btn" href="#" target="_blank" data-course-key="${credit_status["course_key"]}"">${_("Purchase Credit")}</a>
+        </div>
+    % elif credit_status["request_status"] in [None, "pending"]:
+        <p class="message-copy credit-request-pending-msg">
+        ${_("Thank you, your payment is complete, your credit is processing. Please see {provider_link} for more information.").format(
+                provider_link='<a href="{provider_url}">{provider_name}</a>'.format(
+                    provider_url=credit_status["provider_status_url"],
+                    provider_name=credit_status["provider_name"],
+                )
+            )
+        }
+        </p>
+    % elif credit_status["request_status"] == "approved":
+        <p class="message-copy credit-request-approved-msg">
+        ${_("Thank you, your credit is approved! Please see {provider_link} for more information.").format(
+                provider_link='<a href="{provider_url}">{provider_name}</a>'.format(
+                    provider_url=credit_status["provider_status_url"],
+                    provider_name=credit_status["provider_name"],
+                )
+            )
+        }
+        </p>
+    % elif credit_status["request_status"] == "rejected":
+        <p class="message-copy credit-request-rejected-msg">
+        ${_("Your credit has been denied. Please contact {provider_link} for more information.").format(
+                provider_link='<a href="{provider_url}">{provider_name}</a>'.format(
+                    provider_url=credit_status["provider_status_url"],
+                    provider_name=credit_status["provider_name"],
+                )
+            )
+        }
+        </p>
+    % endif
+    </div>
+% endif
