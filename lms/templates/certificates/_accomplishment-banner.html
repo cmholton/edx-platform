@@ -49,7 +49,7 @@ from django.core.urlresolvers import reverse
       });
     });
 
-    function shareOnFB(text) {
+    function shareOnFacebook(text) {
         FB.ui({
             method: 'feed',
             name: text,
@@ -57,8 +57,6 @@ from django.core.urlresolvers import reverse
             picture: "${request.build_absolute_uri(course_image_url)}",
             caption: 'Caption like which appear as title of the dialog box', // TODO# need to update as per requirement
             description: 'Small description of the post' // TODO# need to update as per requirement
-        }, function(response) {
-            console.log(response);
         });
     }
   </script>
@@ -72,16 +70,19 @@ from django.core.urlresolvers import reverse
                 <p class="message-copy copy copy-base emphasized">${accomplishment_banner_congrats}</p>
                 <div class="message-actions">
                     <h3 class="sr-only">${_("Take this with you:")}</h3>
-
-                    <a href="" class="action action-share-facebook btn btn-overlay btn-small icon-only" id="action-share-facebook">
-                        <i class="icon fa fa-facebook-official" aria-hidden="true"></i>
-                        <span class="action-label">${_("Post this on Facebook")}</span>
-                    </a>
-
-                    <a href="" class="action action-share-twitter btn btn-overlay btn-small icon-only" id="action-share-twitter">
-                        <i class="icon fa fa-twitter" aria-hidden="true"></i>
-                        <span class="action-label">${_("Tweet this Accomplishment")}</span>
-                    </a>
+                    % if share_settings:
+                      <%
+                       facebook_share_text = _("I completed the {course_title} course on edX and here is the link to my certificate.").format(course_title=accomplishment_course_title)
+                       if share_settings.get('CERTIFICATE_FACEBOOK_TEXT', None):
+                            facebook_share_text = share_settings.get('CERTIFICATE_FACEBOOK_TEXT')
+                      %>
+                      % if share_settings.get('CERTIFICATE_FACEBOOK', False):
+                        <a href="javascript:void(0)" onclick="shareOnFacebook('${facebook_share_text}'); return false;" class="action action-share-facebook btn btn-overlay btn-small icon-only" id="action-share-facebook">
+                            <i class="icon fa fa-facebook-official" aria-hidden="true"></i>
+                            <span class="action-label">${_("Post this on Facebook")}</span>
+                        </a>
+                      %endif
+                    %endif
 
                     %if linked_in_url:
                     <a class="action action-share-linkedin btn btn-overlay btn-small icon-only" id="action-share-linkedin" target="_blank" href="${linked_in_url}" title="${_('Add to LinkedIn Profile')}" data-course-id="${course_id}" data-certificate-mode="${course_mode}">
@@ -101,27 +102,6 @@ from django.core.urlresolvers import reverse
                         <i class="icon fa fa-print" aria-hidden="true"></i>
                         ${_("Print Certificate")}
                     </button>
-                %if linked_in_url:
-                    <a class="action-linkedin-profile" target="_blank" href="${linked_in_url}"
-                        title="${_('Add to LinkedIn Profile')}"
-                        data-course-id="${course_id}"
-                        data-certificate-mode="${course_mode}">
-                        <img class="action-linkedin-profile-img"
-                            src="${static.url('images/linkedin_add_to_profile.png')}"
-                            alt="${_('Add to LinkedIn Profile')}" />
-                    </a>
-                %endif
-                    % if share_settings:
-                      <%
-                       fb_share_text = _("I completed the {course_title} course on edX and here is the link to my certificate.").format(course_title=accomplishment_course_title)
-                       if share_settings.get('CERTIFICATE_FACEBOOK_TEXT', None):
-                            fb_share_text = share_settings.get('CERTIFICATE_FACEBOOK_TEXT')
-                       %>
-                       % if share_settings.get('CERTIFICATE_FACEBOOK', False):
-                         <a href="javascript:void(0)" onclick="shareOnFB('${fb_share_text}'); return false;">Share</a>
-                       %endif
-                    %endif
-
                 </div>
             </div>
         </div>
