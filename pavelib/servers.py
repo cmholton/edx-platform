@@ -19,14 +19,19 @@ ASSET_SETTINGS_HELP = (
     "Settings file used for updating assets. Defaults to the value of the settings variable if not provided."
 )
 
-def run_server(system, settings=None, asset_settings=None, collect_static=False, port=None, contracts=False):
-    """
-    Start the server for the specified `system` (lms or studio).
-    `settings` is the Django settings module to use; if not provided, use the default.
-    `collect_static` defaults to False, but if True then static files will be collected.
-    `asset_settings` is the settings to use when generating assets; if not provided, assets are not generated.
-    `port` is the port to run the server on; if not provided, use the default port for the system.
-    `contracts` is true if PyContracts are to be enabled. The default is to not include contracts.
+
+def run_server(
+        system, fast=False, settings=None, asset_settings=None, port=None, contracts=False
+):
+    """Start the server for LMS or Studio.
+
+    Args:
+        system (str): The system to be run (lms or studio).
+        fast (bool): If true, then start the server immediately without updating assets (defaults to False).
+        settings (str): The Django settings module to use; if not provided, use the default.
+        asset_settings (str) The settings to use when generating assets. If not provided, assets are not generated.
+        port (str): The port number to run the server on. If not provided, uses the default port for the system.
+        contracts (bool) If true then PyContracts is enabled (defaults to False).
     """
     if system not in ['lms', 'studio']:
         print("System must be either lms or studio", file=sys.stderr)
@@ -35,9 +40,12 @@ def run_server(system, settings=None, asset_settings=None, collect_static=False,
     if not settings:
         settings = DEFAULT_SETTINGS
 
-    if asset_settings:
+    if not fast and asset_settings:
         args = [system, '--settings={}'.format(asset_settings), '--watch']
-        if not collect_static:
+        # The default settings use DEBUG mode for running the server which means that
+        # the optimized assets are ignored, so we skip collectstatic in that case
+        # to save time.
+        if settings == DEFAULT_SETTINGS:
             args.append('--skip-collect')
         call_task('pavelib.assets.update_assets', args=args)
 
@@ -68,12 +76,11 @@ def lms(options):
     asset_settings = getattr(options, 'asset-settings', settings)
     port = getattr(options, 'port', None)
     fast = getattr(options, 'fast', False)
-    collect_static = not fast and asset_settings != settings
     run_server(
         'lms',
+        fast=fast,
         settings=settings,
-        asset_settings=asset_settings if not fast else None,
-        collect_static=collect_static,
+        asset_settings=asset_settings,
         port=port,
     )
 
@@ -94,12 +101,11 @@ def studio(options):
     asset_settings = getattr(options, 'asset-settings', settings)
     port = getattr(options, 'port', None)
     fast = getattr(options, 'fast', False)
-    collect_static = not fast and asset_settings != settings
     run_server(
         'studio',
+        fast=fast,
         settings=settings,
-        asset_settings=asset_settings if not fast else None,
-        collect_static=collect_static,
+        asset_settings=asset_settings,
         port=port,
     )
 
@@ -129,12 +135,11 @@ def devstack(args):
     if args.optimized:
         settings = OPTIMIZED_SETTINGS
         asset_settings = OPTIMIZED_ASSETS_SETTINGS
-    collect_static = not args.fast and asset_settings != settings
     run_server(
         args.system[0],
+        fast=args.fast,
         settings=settings,
-        asset_settings=asset_settings if not args.fast else None,
-        collect_static=collect_static,
+        asset_settings=asset_settings,
         contracts=not args.no_contracts,
     )
 
@@ -159,7 +164,7 @@ def celery(options):
     ("asset_settings=", "a", "Django settings for updating assets for both LMS and Studio (defaults to settings)"),
     ("worker_settings=", "w", "Celery worker Django settings"),
     ("fast", "f", "Skip updating assets"),
-    ("optimized", "f", "Run with optimized assets"),
+    ("optimized", "o", "Run with optimized assets"),
     ("settings_lms=", "l", "Set LMS only, overriding the value from --settings (if provided)"),
     ("asset_settings_lms=", "al", "Set LMS only, overriding the value from --asset_settings (if provided)"),
     ("settings_cms=", "c", "Set Studio only, overriding the value from --settings (if provided)"),
@@ -183,7 +188,6 @@ def run_all_servers(options):
     settings_cms = getattr(options, 'settings_cms', settings)
     asset_settings_lms = getattr(options, 'asset_settings_lms', asset_settings)
     asset_settings_cms = getattr(options, 'asset_settings_cms', asset_settings)
-    collect_static = not fast and asset_settings != settings
 
     if not fast:
         # First update assets for both LMS and Studio but don't collect static yet
@@ -192,10 +196,13 @@ def run_all_servers(options):
             '--settings={}'.format(asset_settings),
             '--skip-collect'
         ]
-
-        # Now collect static for each system separately with the appropriate settings
         call_task('pavelib.assets.update_assets', args=args)
-        if collect_static:
+
+        # Now collect static for each system separately with the appropriate settings.
+        # Note that the default settings use DEBUG mode for running the server which
+        # means that the optimized assets are ignored, so we skip collectstatic in that
+        # case to save time.
+        if settings != DEFAULT_SETTINGS:
             collect_assets(['lms'], asset_settings_lms)
             collect_assets(['studio'], asset_settings_cms)
 

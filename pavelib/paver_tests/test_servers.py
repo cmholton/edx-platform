@@ -202,7 +202,7 @@ class TestPaverServerTasks(PaverTestCase):
         if is_optimized:
             expected_settings = "devstack_optimized"
             expected_asset_settings = "test_static_optimized"
-        expected_collect_static = not is_fast and expected_asset_settings != expected_settings
+        expected_collect_static = not is_fast and expected_settings != "devstack"
         platform_root = os.getcwd()
         if not is_fast:
             expected_messages.append(EXPECTED_PREPROCESS_ASSETS_COMMAND.format(
@@ -241,7 +241,7 @@ class TestPaverServerTasks(PaverTestCase):
         if is_optimized:
             expected_settings = "devstack_optimized"
             expected_asset_settings = "test_static_optimized"
-        expected_collect_static = not is_fast and expected_asset_settings != expected_settings
+        expected_collect_static = not is_fast and expected_settings != "devstack"
         platform_root = os.getcwd()
         expected_messages = []
         if not is_fast:
