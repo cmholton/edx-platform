@@ -270,7 +270,6 @@ def get_thread_list(
     course = _get_course_or_404(course_key, request.user)
     context = get_context(course, request)
     query_params = {
-        "user_id": request.user.id,
         "group_id": (
             None if context["is_requester_privileged"] else
             get_cohort_id(request.user, course.id)
