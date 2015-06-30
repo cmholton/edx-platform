@@ -55,8 +55,7 @@ from django.core.urlresolvers import reverse
             name: text,
             link: "${request.build_absolute_uri(reverse('cert_html_view', kwargs=dict(user_id=str(user.id),course_id=unicode(course_id))))}",
             picture: "${request.build_absolute_uri(course_image_url)}",
-            caption: 'Caption like which appear as title of the dialog box', // TODO# need to update as per requirement
-            description: 'Small description of the post' // TODO# need to update as per requirement
+            description: "${_('Click on the link to see my certificate.')}"
         });
     }
   </script>
@@ -69,17 +68,17 @@ from django.core.urlresolvers import reverse
             <div class="wrapper-copy-and-actions">
                 <p class="message-copy copy copy-base emphasized">${accomplishment_banner_congrats}</p>
                 <div class="message-actions">
-                    <h3 class="sr-only">${_("Take this with you:")}</h3>
+                    <h3 class="sr-only">${_("Print or share your certificate:")}</h3>
                     % if share_settings:
                       <%
-                       facebook_share_text = _("I completed the {course_title} course on edX and here is the link to my certificate.").format(course_title=accomplishment_course_title)
+                       facebook_share_text = _("I completed the {course_title} course on {platform_name}.").format(course_title=accomplishment_course_title, platform_name=platform_name)
                        if share_settings.get('CERTIFICATE_FACEBOOK_TEXT', None):
                             facebook_share_text = share_settings.get('CERTIFICATE_FACEBOOK_TEXT')
                       %>
                       % if share_settings.get('CERTIFICATE_FACEBOOK', False):
                         <a href="javascript:void(0)" onclick="shareOnFacebook('${facebook_share_text}'); return false;" class="action action-share-facebook btn btn-overlay btn-small icon-only" id="action-share-facebook">
                             <i class="icon fa fa-facebook-official" aria-hidden="true"></i>
-                            <span class="action-label">${_("Post this on Facebook")}</span>
+                            <span class="action-label">${_("Post on Facebook")}</span>
                         </a>
                       %endif
                     %endif
