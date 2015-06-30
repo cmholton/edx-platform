@@ -564,6 +564,8 @@ class GetThreadListTest(CommentsServiceMockMixin, UrlResetMixin, ModuleStoreTest
                 "votes": {"up_count": 4},
                 "comments_count": 5,
                 "unread_comments_count": 3,
+                "endorsed": True,
+                "read": True,
             },
             {
                 "type": "thread",
@@ -586,6 +588,8 @@ class GetThreadListTest(CommentsServiceMockMixin, UrlResetMixin, ModuleStoreTest
                 "votes": {"up_count": 9},
                 "comments_count": 18,
                 "unread_comments_count": 0,
+                "endorsed": False,
+                "read": False,
             },
         ]
         expected_threads = [
@@ -615,6 +619,8 @@ class GetThreadListTest(CommentsServiceMockMixin, UrlResetMixin, ModuleStoreTest
                 "endorsed_comment_list_url": None,
                 "non_endorsed_comment_list_url": None,
                 "editable_fields": ["abuse_flagged", "following", "voted"],
+                "has_endorsed": True,
+                "read": True,
             },
             {
                 "id": "test_thread_id_1",
@@ -646,6 +652,8 @@ class GetThreadListTest(CommentsServiceMockMixin, UrlResetMixin, ModuleStoreTest
                     "http://testserver/api/discussion/v1/comments/?thread_id=test_thread_id_1&endorsed=False"
                 ),
                 "editable_fields": ["abuse_flagged", "following", "voted"],
+                "has_endorsed": False,
+                "read": False,
             },
         ]
         self.assertEqual(
