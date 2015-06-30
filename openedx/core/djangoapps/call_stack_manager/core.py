@@ -27,7 +27,7 @@ How to use-
 4. Decorator is a parameterized decorator with class name/s as argument
     How to use -
     1. Import following
-        import from openedx.core.djangoapps.call_stack_manager import donottrack
+        from openedx.core.djangoapps.call_stack_manager import donottrack
 """
 
 import logging
