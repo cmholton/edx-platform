@@ -22,105 +22,109 @@
  * @param errorNotification, optional callback that can return a success NotificationModel for display
  *     after a file failed to upload. This method will be passed the attempted file, event, and data.
  */
-(function (Backbone, $, _, gettext, interpolate_text, NotificationModel, NotificationView) {
-    // Requires JQuery-File-Upload.
-    var FileUploaderView = Backbone.View.extend({
+;(function (define) {
+    'use strict';
+    define(['backbone', 'jquery', 'underscore', 'gettext', 'string_utils', 'js/models/notification', 'js/views/notification', 'jquery.fileupload'],
+            function (Backbone, $, _, gettext, interpolate_text, NotificationModel, NotificationView) {
+                // Requires JQuery-File-Upload.
+                var FileUploaderView = Backbone.View.extend({
 
-        initialize: function (options) {
-            this.template = _.template($('#file-upload-tpl').text());
-            this.options = options;
-        },
+                    initialize: function (options) {
+                        this.template = _.template($('#file-upload-tpl').text());
+                        this.options = options;
+                    },
 
-        render: function () {
-            var options = this.options,
-                get_option_with_default = function(option, default_value) {
-                    var optionVal = options[option];
-                    return optionVal ? optionVal : default_value;
-                },
-                submitButton, resultNotification;
+                    render: function () {
+                        var options = this.options,
+                            get_option_with_default = function(option, default_value) {
+                                var optionVal = options[option];
+                                return optionVal ? optionVal : default_value;
+                            },
+                            submitButton, resultNotification;
 
-            this.$el.html(this.template({
-                title: get_option_with_default("title", ""),
-                inputLabel: get_option_with_default("inputLabel", ""),
-                inputTip: get_option_with_default("inputTip", ""),
-                extensions: get_option_with_default("extensions", ""),
-                submitButtonText: get_option_with_default("submitButtonText", gettext("Upload File")),
-                url: get_option_with_default("url", "")
-            }));
+                        this.$el.html(this.template({
+                            title: get_option_with_default("title", ""),
+                            inputLabel: get_option_with_default("inputLabel", ""),
+                            inputTip: get_option_with_default("inputTip", ""),
+                            extensions: get_option_with_default("extensions", ""),
+                            submitButtonText: get_option_with_default("submitButtonText", gettext("Upload File")),
+                            url: get_option_with_default("url", "")
+                        }));
 
-            submitButton = this.$el.find('.submit-file-button');
-            resultNotification = this.$el.find('.result'),
+                        submitButton = this.$el.find('.submit-file-button');
+                        resultNotification = this.$el.find('.result'),
 
-            this.$el.find('#file-upload-form').fileupload({
-                dataType: 'json',
-                type: 'POST',
-                done: this.successHandler.bind(this),
-                fail: this.errorHandler.bind(this),
-                autoUpload: false,
-                replaceFileInput: false,
-                add: function (e, data) {
-                    var file = data.files[0];
-                    submitButton.removeClass("is-disabled").attr('aria-disabled', false);
-                    submitButton.unbind('click');
-                    submitButton.click(function (event) {
-                        event.preventDefault();
-                        data.submit();
-                    });
-                    resultNotification.html("");
-                }
-            });
+                        this.$el.find('#file-upload-form').fileupload({
+                            dataType: 'json',
+                            type: 'POST',
+                            done: this.successHandler.bind(this),
+                            fail: this.errorHandler.bind(this),
+                            autoUpload: false,
+                            replaceFileInput: false,
+                            add: function (e, data) {
+                                var file = data.files[0];
+                                submitButton.removeClass("is-disabled").attr('aria-disabled', false);
+                                submitButton.unbind('click');
+                                submitButton.click(function (event) {
+                                    event.preventDefault();
+                                    data.submit();
+                                });
+                                resultNotification.html("");
+                            }
+                        });
 
-            return this;
-        },
+                        return this;
+                    },
 
-        successHandler: function (event, data) {
-            var file = data.files[0].name;
-            var notificationModel;
-            if (this.options.successNotification) {
-                notificationModel = this.options.successNotification(file, event, data);
-            }
-            else {
-                notificationModel = new NotificationModel({
-                    type: "confirmation",
-                    title: interpolate_text(gettext("Your upload of '{file}' succeeded."), {file: file})
-                });
-            }
-            var notification = new NotificationView({
-                el: this.$('.result'),
-                model: notificationModel
-            });
-            notification.render();
-        },
+                    successHandler: function (event, data) {
+                        var file = data.files[0].name;
+                        var notificationModel;
+                        if (this.options.successNotification) {
+                            notificationModel = this.options.successNotification(file, event, data);
+                        }
+                        else {
+                            notificationModel = new NotificationModel({
+                                type: "confirmation",
+                                title: interpolate_text(gettext("Your upload of '{file}' succeeded."), {file: file})
+                            });
+                        }
+                        var notification = new NotificationView({
+                            el: this.$('.result'),
+                            model: notificationModel
+                        });
+                        notification.render();
+                    },
 
-        errorHandler: function (event, data) {
-            var file = data.files[0].name, message = null, jqXHR = data.response().jqXHR;
-            var notificationModel;
-            if (this.options.errorNotification) {
-                notificationModel = this.options.errorNotification(file, event, data);
-            }
-            else {
-                if (jqXHR.responseText) {
-                    try {
-                        message = JSON.parse(jqXHR.responseText).error;
+                    errorHandler: function (event, data) {
+                        var file = data.files[0].name, message = null, jqXHR = data.response().jqXHR;
+                        var notificationModel;
+                        if (this.options.errorNotification) {
+                            notificationModel = this.options.errorNotification(file, event, data);
+                        }
+                        else {
+                            if (jqXHR.responseText) {
+                                try {
+                                    message = JSON.parse(jqXHR.responseText).error;
+                                }
+                                catch (err) {
+                                }
+                            }
+                            if (!message) {
+                                message = interpolate_text(gettext("Your upload of '{file}' failed."), {file: file});
+                            }
+                            notificationModel = new NotificationModel({
+                                type: "error",
+                                title: message
+                            });
+                        }
+                        var notification = new NotificationView({
+                            el: this.$('.result'),
+                            model: notificationModel
+                        });
+                        notification.render();
                     }
-                    catch (err) {
-                    }
-                }
-                if (!message) {
-                    message = interpolate_text(gettext("Your upload of '{file}' failed."), {file: file});
-                }
-                notificationModel = new NotificationModel({
-                    type: "error",
-                    title: message
                 });
-            }
-            var notification = new NotificationView({
-                el: this.$('.result'),
-                model: notificationModel
-            });
-            notification.render();
-        }
-    });
 
-    this.FileUploaderView = FileUploaderView;
-}).call(this, Backbone, $, _, gettext, interpolate_text, NotificationModel, NotificationView);
+                return FileUploaderView;
+        });
+}).call(this, define || RequireJS.define);

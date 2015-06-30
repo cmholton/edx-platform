@@ -19,6 +19,11 @@
     } else {
         paths.gettext = "/i18n";
     }
+    if (window.ngettext) {
+        define("ngettext", [], function() {return window.ngettext;});
+    } else {
+        paths.gettext = "/i18n";
+    }
     if (window.Logger) {
         define("logger", [], function() {return window.Logger;});
     } else {

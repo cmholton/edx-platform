@@ -12,6 +12,9 @@
         if (window.gettext) {
             define("gettext", [], function() {return window.gettext;});
         }
+        if (window.ngettext) {
+            define("ngettext", [], function() {return window.ngettext;});
+        }
         if (window.Logger) {
             define("logger", [], function() {return window.Logger;});
         }
