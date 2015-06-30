@@ -219,7 +219,6 @@ class TestPaverServerTasks(PaverTestCase):
             system=system,
             settings=expected_settings,
             port=port,
-            contracts=" --contracts" if not no_contracts else ""
         )
         if not no_contracts:
             expected_run_server_command += " --contracts"
