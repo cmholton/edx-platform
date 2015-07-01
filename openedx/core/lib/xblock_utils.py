@@ -240,7 +240,7 @@ def add_staff_markup(user, has_instructor_access, disable_staff_debug_info, bloc
         else:
             return frag
 
-    if isinstance(block, SequenceModule):
+    if isinstance(block, SequenceModule) or getattr(block, 'HIDDEN', False):
         return frag
 
     block_id = block.location

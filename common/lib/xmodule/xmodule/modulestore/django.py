@@ -27,6 +27,7 @@ from xmodule.modulestore.draft_and_published import BranchSettingMixin
 from xmodule.modulestore.mixed import MixedModuleStore
 from xmodule.util.django import get_current_request_hostname
 import xblock.reference.plugins
+from xblock_django.models import XBlockDisableConfig
 
 
 try:
@@ -161,12 +162,18 @@ def create_modulestore_instance(
     if 'read_preference' in doc_store_config:
         doc_store_config['read_preference'] = getattr(ReadPreference, doc_store_config['read_preference'])
 
+    if getattr(settings, 'ENABLE_DISABLING_XBLOCK_TYPES', False):
+        disabled_xblock_types = XBlockDisableConfig.disabled_block_types()
+    else:
+        disabled_xblock_types = ()
+
     return class_(
         contentstore=content_store,
         metadata_inheritance_cache_subsystem=metadata_inheritance_cache,
         request_cache=request_cache,
         xblock_mixins=getattr(settings, 'XBLOCK_MIXINS', ()),
         xblock_select=getattr(settings, 'XBLOCK_SELECT_FUNCTION', None),
+        disabled_xblock_types=disabled_xblock_types,
         doc_store_config=doc_store_config,
         i18n_service=i18n_service or ModuleI18nService(),
         fs_service=fs_service or xblock.reference.plugins.FSService(),

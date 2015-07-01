@@ -759,6 +759,8 @@ INSTALLED_APPS = (
 
     # Credit courses
     'openedx.core.djangoapps.credit',
+
+    'xblock_django',
 )
 
 
