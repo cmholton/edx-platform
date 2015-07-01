@@ -94,6 +94,12 @@
 // ------------------------------
 @media print {
 
+    html,
+    body {
+        height: 650px;
+        page-break-after: avoid;
+    }
+
     // hide elements not needed for print rendering
     .wrapper-banner-user,
     .wrapper-about,
