@@ -331,6 +331,28 @@ def set_enrollment_attributes(user_id, course_id, attributes):
     _data_api().add_or_update_enrollment_attr(user_id, course_id, attributes)
 
 
+def get_enrollment_attributes(user_id, course_id):
+    """Retrieve enrollment attributes for given user for provided course.
+
+    Args:
+        user_id: The User to get enrollment attributes for
+        course_id (str): The Course to get enrollment attributes for.
+
+    Example:
+        >>>get_enrollment_attributes("Bob", "course-v1-edX-DemoX-1T2015")
+        [
+            {
+                "namespace": "credit",
+                "name": "provider_id",
+                "value": "hogwarts",
+            },
+        ]
+
+    Returns: list
+    """
+    return _data_api().get_enrollment_attributes(user_id, course_id)
+
+
 def _validate_course_mode(course_id, mode):
     """Checks to see if the specified course mode is valid for the course.
 

@@ -159,20 +159,54 @@ def add_or_update_enrollment_attr(user_id, course_id, attributes):
         )
     """
     course_key = CourseKey.from_string(course_id)
-    try:
-        user = User.objects.get(username=user_id)
-    except User.DoesNotExist:
-        msg = u"Not user with username '{username}' found.".format(username=user_id)
-        log.warn(msg)
-        raise UserNotFoundError(msg)
-
+    user = _get_user(user_id)
     enrollment = CourseEnrollment.get_enrollment(user, course_key)
     for attribute in attributes:
-        if not _invalid_attribute(attribute):
+        if not _invalid_attribute(attribute) and enrollment is not None:
             CourseEnrollmentAttribute.set_enrollment_attribute(
                 enrollment, attribute['value'], attribute['namespace'], attribute['name']
             )
 
+
+def get_enrollment_attributes(user_id, course_id):
+    """Retrieve enrollment attributes for given user for provided course.
+
+    Args:
+        user_id: The User to get enrollment attributes for
+        course_id (str): The Course to get enrollment attributes for.
+
+    Example:
+        >>>get_enrollment_attributes("Bob", "course-v1-edX-DemoX-1T2015")
+        [
+            {
+                "namespace": "credit",
+                "name": "provider_id",
+                "value": "hogwarts",
+            },
+        ]
+
+    Returns: list
+    """
+    course_key = CourseKey.from_string(course_id)
+    user = _get_user(user_id)
+    enrollment = CourseEnrollment.get_enrollment(user, course_key)
+    return CourseEnrollmentAttribute.get_enrollment_attributes(enrollment)
+
+
+def _get_user(user_id):
+    """Retrieve user with provided user_id
+
+    Args:
+        user_id(str): username of the user for which object is to retrieve
+
+    Returns: obj
+    """
+    try:
+        return User.objects.get(username=user_id)
+    except User.DoesNotExist:
+        msg = u"Not user with username '{username}' found.".format(username=user_id)
+        log.warn(msg)
+        raise UserNotFoundError(msg)
 
 def _update_enrollment(enrollment, is_active=None, mode=None):
     enrollment.update_enrollment(is_active=is_active, mode=mode)
