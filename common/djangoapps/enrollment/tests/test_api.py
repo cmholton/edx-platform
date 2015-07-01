@@ -166,7 +166,6 @@ class EnrollmentTest(TestCase):
         attributes = api.get_enrollment_attributes(self.USERNAME, self.COURSE_ID)
         self.assertEquals(enrollment_attributes[0], attributes[0])
 
-
     def test_get_course_details(self):
         # Add a fake course enrollment information to the fake data API
         fake_data_api.add_course(self.COURSE_ID, course_modes=['honor', 'verified', 'audit'])

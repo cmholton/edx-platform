@@ -208,6 +208,7 @@ def _get_user(user_id):
         log.warn(msg)
         raise UserNotFoundError(msg)
 
+
 def _update_enrollment(enrollment, is_active=None, mode=None):
     enrollment.update_enrollment(is_active=is_active, mode=mode)
     enrollment.save()

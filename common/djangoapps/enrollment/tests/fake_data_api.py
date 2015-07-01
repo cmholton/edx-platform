@@ -19,7 +19,7 @@ _ENROLLMENTS = []
 
 _COURSES = []
 
-_ENROLLMENT_ATTRIBUTES =[]
+_ENROLLMENT_ATTRIBUTES = []
 
 
 # pylint: disable=unused-argument
