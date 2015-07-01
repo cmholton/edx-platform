@@ -1338,6 +1338,7 @@ certificates_web_view_js = [
     'js/vendor/jquery.min.js',
     'js/vendor/jquery.cookie.js',
     'js/src/logger.js',
+    'js/utils/facebook.js'
 ]
 
 credit_web_view_js = [
