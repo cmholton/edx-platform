@@ -777,6 +777,33 @@ class GetThreadListTest(CommentsServiceMockMixin, UrlResetMixin, ModuleStoreTest
             "per_page": ["11"],
         })
 
+    @ddt.data("unanswered", "unread")
+    def test_view_query(self, query):
+        self.register_get_threads_response([], page=1, num_pages=1)
+        result = get_thread_list(
+            self.request,
+            self.course.id,
+            page=1,
+            page_size=11,
+            view=query,
+        )
+        self.assertEqual(
+            result,
+            {"results": [], "next": None, "previous": None, "text_search_rewrite": None}
+        )
+        self.assertEqual(
+            urlparse(httpretty.last_request().path).path,
+            "/api/v1/threads"
+        )
+        self.assert_last_query_params({
+            "course_id": [unicode(self.course.id)],
+            "sort_key": ["date"],
+            "sort_order": ["desc"],
+            "page": ["1"],
+            "per_page": ["11"],
+            "recursive": ["False"],
+            query: ["True"],
+        })
 
 @ddt.ddt
 class GetCommentListTest(CommentsServiceMockMixin, ModuleStoreTestCase):

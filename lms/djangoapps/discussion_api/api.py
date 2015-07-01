@@ -283,9 +283,10 @@ def get_thread_list(
 
     text_search_rewrite = None
 
-    if view:
-        query_params["unanswered"] = True if "unanswered" in view else False
-        query_params["unread"] = True if "unread" in view else False
+    if view and "unanswered" in view:
+        query_params["unanswered"] = True
+    if view and "unread" in view:
+        query_params["unread"] = True
 
     if following:
         threads, result_page, num_pages = context["cc_requester"].subscribed_threads(query_params)
