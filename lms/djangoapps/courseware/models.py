@@ -80,7 +80,7 @@ class StudentModule(CallStackMixin, models.Model):
     """
     Keeps student state for a particular module in a particular course.
     """
-    # uses both ChunkingManager and CallStackManager
+    # uses both ChunkingManager and CallStackManager in ChuckingCallStackManager
     objects = ChunkingCallStackManager()
 
     MODEL_TAGS = ['course_id', 'module_type']
