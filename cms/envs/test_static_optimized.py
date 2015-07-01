@@ -10,32 +10,19 @@ support both generating static assets to a directory and also serving static
 from the same directory.
 """
 
-import os
-from path import path
+# First import the devstack base settings
+from .devstack import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
-# Pylint gets confused by path.py instances, which report themselves as class
-# objects. As a result, pylint applies the wrong regex in validating names,
-# and throws spurious errors. Therefore, we disable invalid-name checking.
-# pylint: disable=invalid-name
+######################### Static file overrides ####################################
 
-########################## Production settings ###################################
-
-# Specify the config root so that it is set correctly on both Jenkins and devstack
-os.environ['CONFIG_ROOT'] = path(__file__).abspath().dirname()  # pylint: disable=no-value-for-parameter
-
-# Import settings from aws.py to generate assets as close to production as possible.
-from .aws import *  # pylint: disable=wildcard-import, unused-wildcard-import
-
-######################### Testing overrides ####################################
-
-# Redirects to the test_root folder within the repo
+# Redirect to the test_root folder within the repo
 TEST_ROOT = REPO_ROOT / "test_root"  # pylint: disable=no-value-for-parameter
 LOG_DIR = (TEST_ROOT / "log").abspath()
 
-# Stores the static files under test root so that they don't overwrite existing static assets
+# Store the static files under test root so that they don't overwrite existing static assets
 STATIC_ROOT = (TEST_ROOT / "staticfiles" / "cms").abspath()
 
-# Disables uglify when tests are running (used by build.js).
+# Disable uglify when tests are running (used by build.js).
 # 1. Uglify is by far the slowest part of the build process
 # 2. Having full source code makes debugging tests easier for developers
 os.environ['REQUIRE_BUILD_PROFILE_OPTIMIZE'] = 'none'
