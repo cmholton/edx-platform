@@ -591,7 +591,7 @@ function (VideoPlayer, i18n, moment) {
                 self.loadHtmlPlayer();
             });
 
-            this.loadYouTubeIFrameAPI(scriptTag);
+            window.Video.loadYouTubeIFrameAPI(scriptTag);
         }
         return __dfd__.promise();
     }
