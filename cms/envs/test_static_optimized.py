@@ -11,23 +11,19 @@ from the same directory.
 """
 
 import os
-from path import path  # pylint: disable=no-name-in-module
+from path import path
 
 # Pylint gets confused by path.py instances, which report themselves as class
 # objects. As a result, pylint applies the wrong regex in validating names,
 # and throws spurious errors. Therefore, we disable invalid-name checking.
 # pylint: disable=invalid-name
 
+########################## Production settings ###################################
 
-########################## Prod-like settings ###################################
-# These should be as close as possible to the settings we use in production.
-# As in prod, we read in environment and auth variables from JSON files.
-# Unlike in prod, we use the JSON files stored in this repo.
-# This is a convenience for ensuring (a) that we can consistently find the files
-# and (b) that the files are the same in Jenkins as in local dev.
-os.environ['SERVICE_VARIANT'] = 'bok_choy'
+# Specify the config root so that it is set correctly on both Jenkins and devstack
 os.environ['CONFIG_ROOT'] = path(__file__).abspath().dirname()  # pylint: disable=no-value-for-parameter
 
+# Import settings from aws.py to generate assets as close to production as possible.
 from .aws import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
 ######################### Testing overrides ####################################
