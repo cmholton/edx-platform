@@ -97,8 +97,8 @@ class RandomizeModuleTestCase(unittest.TestCase):
         randomize_module = RandomizeModule(
             randomize_descriptor,
             self.system,
-            DictFieldData({}),
-            ScopeIds(None, None, self.course.id, self.course.id)
+            field_data=None,
+            scope_ids=ScopeIds(None, None, self.course.id, self.course.id)
         )
         self.assertTrue(randomize_module.child.display_name in ['A', 'B'])
         self.assertTrue(randomize_module.get_children, 1)
